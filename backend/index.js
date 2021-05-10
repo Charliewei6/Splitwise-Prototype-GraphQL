@@ -9,16 +9,16 @@ app.set('view engine', 'ejs');
 var path = require('path');
 var multer = require("multer");
 var moment = require("moment");
-var crypto = require('crypto');
 var fs = require('fs');
 var AWS = require('aws-sdk');
 
-const jwt = require('jsonwebtoken');
-const { secret } = require('./config');
 const { checkAuth } = require("./passport");
 const { auth } = require("./passport");
 auth();
+const { graphqlHTTP } = require("express-graphql");
 
+const graphQlSchema = require('./graphql/schema');
+const graphQlResolvers = require('./graphql/resolver');
 
 const { mongoDB } = require('./config');
 const mongoose = require('mongoose');
@@ -50,7 +50,7 @@ app.use(cors());
 
 //use express session to maintain session data
 app.use(session({
-    secret              : 'cmpe273_kafka_passport_mongo',
+    secret              : 'cmpe273_secret_key',
     resave              : false, // Forces the session to be saved back to the session store, even if the session was never modified during the request
     saveUninitialized   : false, // Force to save uninitialized session to db. A session is uninitialized when it is new but not modified.
     duration            : 60 * 60 * 1000,    // Overall duration of Session : 30 minutes : 1800 seconds
@@ -80,106 +80,19 @@ const imageUploader = multer({
 
 app.use(bodyParser.json());
 
-app.post('/login',(req, res) => {
-    var u = {
-        email :req.body.email,
-        password :req.body.password,
-    };
-    Users.findOne({ Email: req.body.email, Password: crypto.createHash('md5').update(req.body.password).digest("hex") }, (error, user) => {
-        if (error) {
-            res.writeHead(500, {
-                'Content-Type': 'text/plain'
-            })
-            res.end("Error Occured");
-            return;
-        }
-        if (user) {
-            const payload = { _id: user._id,email: user.Email};
-            const token = jwt.sign(payload, secret, {
-                expiresIn: 1008000
-            });
-            res.status(200).json({
-                id: user._id,
-                jwt: "JWT " + token
-            });
-        }
-        else {
-            res.status(401).end("Invalid Credentials");
-        }
-    });    
-});
 
-app.post('/signup',function(req,res){
-    var newuser = new Users({
-        Name : req.body.name,
-        Email :req.body.email,
-        Password :crypto.createHash('md5').update(req.body.password).digest("hex")
-    });
 
-    Users.findOne({ Email: req.body.email }, (error, user) => {
-        if (error) {
-            res.status(401).json({
-                message: 'error'
-            });
-        }
-        if (user) {
-            res.writeHead(400, {
-                'Content-Type': 'text/plain'
-            })
-            res.end("Email already exists");
-        }
-        else {
-            newuser.save((error, data) => {
-                if (error) {
-                    res.writeHead(500, {
-                        'Content-Type': 'text/plain'
-                    })
-                    res.end();
-                }
-                else {
-                    res.writeHead(200,{
-                        'Content-Type' : 'text/plain'
-                    })
-                    res.end("Successful Signup");
-                }
-            });
-        }
-    });
-   
-});
-app.get('/profile',function(req,res){
-    var userId = req.query.user_id;
-    Users.findOne({ _id: userId }, (err, user) => {
-        if (err) {
-            console.log("error: ", err);
-            res.status(401).send('error');
-        } else {
-            console.log(user)
-            res.send(user);
-        }
-        res.end();
-    });
-});
+app.use(
+    '/graphql',
+    graphqlHTTP({
+      schema: graphQlSchema,
+      rootValue: graphQlResolvers,
+      graphiql: true
+    })
+  );
 
-app.post('/profile', checkAuth,function (req, res) {
-    id = req.body.user_id
-    // var newvalues = {$set: {"Name": req.body.name,"Email": req.body.email,"Picture":req.body.picture,
-    // "Phone":req.body.phone, "Currency":req.body.currency,"Language":req.body.language} };
-    var newvalues = {$set: {Name: req.body.name,Email: req.body.email,Picture:req.body.picture,
-    Phone:req.body.phone, Currency:req.body.currency,Timezone:req.body.timezone,Language:req.body.language} };
-    Users.findByIdAndUpdate( id, newvalues ,(err, user) => {
-        if (err) {
-            console.log("error: ", err);
-            res.status(401).json({
-                message: 'error'
-            });
-        } else {
-            res.status(200).json({
-                message: 'success'
-            });
-        }
-    });
-});
+
+
 const s3 = new AWS.S3({
     accessKeyId: "AKIAXVWN4WFGRBBGFJHM",
     secretAccessKey: "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"
@@ -209,7 +122,6 @@ app.post('/upload',imageUploader,(req,res,next) => {
                     },
         });
         // res.status(200).send(data.Location)
-
     })
 })
 app.get('/upload', function (req, res) {
@@ -217,110 +129,51 @@ app.get('/upload', function (req, res) {
 });
 
 
-app.post('/group',checkAuth, function (req, res) {
+
+
+
+app.post('/group',async function (req, res) {
     var userId = req.body.user_id;
     var userName = req.body.user_name;
     var name = req.body.name;
     var members = req.body.members;
-
+    console.log(members)
     var newgroup = new CreateGroup({
         name : req.body.name,
         picture :req.body.picture,
         creator_id: req.body.user_id
     });
-    CreateGroup.findOne({ name: req.body.name },(err, result) => {
-        if (err) {
-            res.status(401).json({
-                message: 'error'
-            });
-        }
+    result = await CreateGroup.findOne({ name: req.body.name })
         if (result) {
             res.writeHead(400, {
                 'Content-Type': 'text/plain'
             })
             res.end("Name already exists");
         }
-        
         else {
-
-            newgroup.save((error, data) => {
-                if (error) {
-                    res.writeHead(500, {
-                        'Content-Type': 'text/plain'
-                    })
-                    res.end();
-                }
-                else {
+            data = await newgroup.save() 
+                if (data) {
                     var groupId = data._id;
                     var myobj = { group_id: groupId, person_id: data.creator_id };
-                    GroupPerson.create(myobj,(err, result) => {
-                        if (err) {
-                            res.status(200).json({
-                                message: 'error'
-                            });
-                        } else {
-                            if (members) {
-                                var obj = [];
-                                for (var i=0; i<members.length; i++) {
-                                    obj.push({inviter_id:result.person_id,inviter_name:userName,group_id:groupId,group_name:name,invitee_id:members[i]})
-                                }       
-                                console.log(obj)
-                        
-                                Invite.create(obj,(err, result) => {
-                                    if (err) {
-                                        console.log(err);
-                                        res.status(401).json({
-                                            message: 'error'
-                                        });
-                                    }
-                                });
-                            }
-                        }
-                    });
+                    result = await GroupPerson.create(myobj)
+                        if (result) {
+                            var obj = [];
+                            for (var i=0; i<members.length; i++) {
+                                obj.push({inviter_id:result.person_id,inviter_name:userName,group_id:groupId,group_name:name,invitee_id:members[i]})
+                            }       
+                            console.log(obj)
+                            await Invite.create(obj)
+                        } 
+                  
                 }
-        });
+        
     }
-    
     res.status(200).json({
         message: 'success'
     });
+
 });
-});
-app.get('/search_person', function (req, res) {
-    var email = req.query.email;
-    email = email.split(" ").map(n => new RegExp(n));
-    console.log(email)
-    Users.find({Email:{ $in: email }},(err, result) => {
-        if (err) {
-            console.log(err)
-            res.status(401).json({
-                message: 'error'
-            });
-        } else {
-            // console.log("here:",result)
-            res.status(200).json(
-                result
-            );
-        }
-    });
-});
-// app.get('/group', function (req, res) {
-//     var groupId = req.query.group_id;
-//     var sql = `SELECT * FROM cre_group WHERE id = ${groupId}; SELECT p.id,p.Name,p.Email FROM group_person AS gp LEFT JOIN Persons AS p ON gp.person_id = p.id WHERE gp.group_id = ${groupId}`;
-//     db.query(sql,(err, result) => {
-//         if (err) {
-//             console.log(err)
-//             res.status(401).json({
-//                 message: 'error'
-//             });
-//         } else {
-//             res.status(200).json({
-//                 group: result[0],
-//                 members: result[1]
-//             });
-//         }
-//     });
-// });
+
 
 app.get('/invite', checkAuth,function (req, res) {
     var userId = req.query.user_id;

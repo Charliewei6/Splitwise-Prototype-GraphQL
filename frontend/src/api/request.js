@@ -2,15 +2,33 @@ import axios from 'axios';
 axios.defaults.withCredentials = false;
 const domain = 'http://localhost:3001' 
 const login = (data) => {
-    return axios.post(`${domain}/login`,data).then(res => res.data)
-    // return Promise.resolve({
-    //      id : 1,
-    //      name : 'test'
-    // })
+    return axios.post(`${domain}/graphql`,data).then(res => res.data)
+    
 }
 const signUP = (data) => {
-    return axios.post(`${domain}/signUP`,data).then(res => res.data)
+    return axios.post(`${domain}/graphql`,data).then(res => res.data)
+    
 }
+const getProfile = (data) => {
+    return axios.post(`${domain}/graphql`,data).then(res => res.data)
+}
+const changeUserInfo = (data) => {
+    return axios.post(`${domain}/graphql`,data).then(res => res.data)
+}
+
+const searchUser = (data) => {
+    return axios.post(`${domain}/graphql`,data).then(res => res.data)
+}
+
+const createGroup = (data) => {
+    return axios.post(`${domain}/graphql`,data).then(res => res.data)
+}
+
+
+
+
+
+
 const getDashboard = (userId) => {
     return axios.get(`${domain}/dashboard?user_id=${userId}`).then(res => res.data)
 }
@@ -19,9 +37,7 @@ const settleUp = (userId) => {
          user_id : userId
     }).then(res => res.data)
 }
-const getProfile = (userId) => {
-    return axios.get(`${domain}/profile?user_id=${userId}`).then(res => res.data)
-}
+
 const uploadImg = (file) => {
      return axios.post(`${domain}/upload`,file,{
          onUploadProgress : e => {
@@ -29,24 +45,9 @@ const uploadImg = (file) => {
          }
      }).then(res => res.data)
 }
-const changeUserInfo = ({ userId,email,name,avatarUrl,phoneNumber,currency,timeZone,language }) => {
-    return axios.post(`${domain}/profile`,{
-         user_id : userId,
-         email,
-         name,
-         picture:avatarUrl,
-         phone : phoneNumber,
-         currency,
-         timezone:timeZone,
-         language
-    }).then(res => res.data)
-}
-const searchUser = (email) => {
-     return axios.get(`${domain}/search_person?email=${email}`).then(res => res.data)
-}
-const createGroup = (data) => {
-    return axios.post(`${domain}/group`,data).then(res => res.data)
-}
+
+
+
 const getInvite = (userInfo) => {
     return axios.get(`${domain}/invite?user_id=${userInfo._id}`).then(res => res.data)
 }

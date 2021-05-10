@@ -6,6 +6,8 @@ import {Form,Col,Card} from 'react-bootstrap';
 import { login,getProfile } from '../../api/request';
 import { connect } from 'react-redux';
 import { SET_USER } from '../../store/actionTypes';
+import jwt_decode from "jwt-decode"
+
 class Login extends Component{
     //call the constructor method
     constructor(props){
@@ -35,20 +37,44 @@ class Login extends Component{
     }
     //submit Login handler to send a request to the node backend
     submitLogin = (e) => {
-        //prevent page from refresh
         e.preventDefault();
         const data = {
-            email : this.state.email,
-            password : this.state.password
-        }
+            query: `
+              mutation {
+                login(email: "${this.state.email}", password: "${this.state.password}") {
+                  jwt
+                }
+              }
+            `
+          };
+      
         //set the with credentials to true
         login(data).then(response => {
-            cookie.save('cookie', response.id);
-            getProfile(response.id).then(data => {
-                data.Timezone = data.Timezone || 'Africa/Abidjan'
-                data.Currency = data.Currency || 0
-                localStorage.setItem('userInfo',JSON.stringify(data))                
-                this.props.setUser(data)
+            localStorage.setItem("token", response.data.login.jwt);
+            var decoded = jwt_decode(response.data.login.jwt.split(' ')[1]);
+            localStorage.setItem("user_id", decoded._id);
+            localStorage.setItem("email", decoded.email);
+
+            let profile_data = {
+                query: `
+                query{
+                    getprofile(user_id:"${decoded._id}"){
+                        _id
+                        Name
+                        Email
+                        Phone
+                        Currency
+                        Language
+                        Timezone
+                        Picture
+                    }
+                  }`
+            }
+            getProfile(profile_data).then(data => {
+                data.data.getprofile.Timezone = data.data.getprofile.Timezone || 'Africa/Abidjan'
+                data.data.getprofile.Currency = data.data.getprofile.Currency || 0
+                localStorage.setItem('userInfo',JSON.stringify(data.data.getprofile))                
+                this.props.setUser(data.data.getprofile)
                 this.props.history.push('/dashboard')
             })
         }).catch((error) => this.setState({

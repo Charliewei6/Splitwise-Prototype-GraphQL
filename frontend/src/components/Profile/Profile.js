@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import '../../App.css';
-import cookie from 'react-cookies';
+import axios from 'axios';
 import Navbar from '../Navbar/Navbar';
 import {Container,Form} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -113,14 +113,31 @@ class Profile extends Component{
     }
 //get the books data from backend  
     componentDidMount(){
-        if(!cookie.load('cookie')){
+        if(!localStorage.getItem('token')){
             this.props.history.push('/')
-           }
+        }
 
         let { _id } = this.props.userInfo
         if(!_id) return;
-        getProfile(this.props.userInfo._id).then(data => {
-            this.props.setUser(data)
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        let profile_data = {
+            query: `
+            query{
+                getprofile(user_id:"${this.props.userInfo._id}"){
+                  _id
+                  Name
+                  Email
+                  Phone
+                  Currency
+                  Language
+                  Timezone
+                  Picture
+                }
+              }`
+        }
+        
+        getProfile(profile_data).then(data => {
+            this.props.setUser(data.data.getprofile)
             let { Name,Email,Phone,Currency,Language,Timezone,Picture } = this.props.userInfo
             this.setState({
                 name : Name || '',
@@ -239,19 +256,44 @@ class Profile extends Component{
     }
     saveProfile() {
          let { name,email,phoneNumber,currency,language,timeZone,avatarUrl } = this.state
-         changeUserInfo({
-            userId:this.props.userInfo._id,name,email,phoneNumber,currency,language,timeZone,avatarUrl
-         }).then(() => {
+         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+         let data  ={
+            query: `
+            mutation{
+                postProfile(profileInput:{id:"${this.props.userInfo._id}",name:"${name}",email:"${email}",
+                  phone:"${phoneNumber}",picture:"${avatarUrl}",currency:${currency},timezone:"${timeZone}",language:${language}}) {
+                  _id
+                }
+              }
+            `
+         }
+         changeUserInfo(data).then(() => {
               this.setState( {
                 editingName : false,
                 editingEmail : false,
                 editingPhone : false
               })
-              getProfile(this.props.userInfo._id).then(data => {
-                  localStorage.setItem('userInfo',JSON.stringify(data))
-                  this.props.setUser(data)
-                  let { Name,Email,Phone,Currency,Language,Timezone,Picture } = this.props.userInfo
-                  this.setState({
+              axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+              let profile_data  = {
+                query: `
+                query{
+                    getprofile(user_id:"${this.props.userInfo._id}"){
+                      _id
+                      Name
+                      Email
+                      Phone
+                      Currency
+                      Language
+                      Timezone
+                      Picture
+                    }
+                  }`
+            }
+            getProfile(profile_data).then(data => {
+                localStorage.setItem('userInfo',JSON.stringify(data.data.getprofile))
+                this.props.setUser(data.data.getprofile)
+                let { Name,Email,Phone,Currency,Language,Timezone,Picture } = this.props.userInfo
+                this.setState({
                         name : Name || '',
                         email : Email || '',
                         phoneNumber : Phone || '',
@@ -259,7 +301,7 @@ class Profile extends Component{
                         language : Language || 0,
                         timeZone : Timezone || 'America/New_York',
                         avatarUrl : Picture || ''
-                    })
+                })
               })
               alert('Save succeed')
               

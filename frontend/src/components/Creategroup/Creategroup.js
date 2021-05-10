@@ -1,6 +1,6 @@
 import React, {Component} from 'react';
 import '../../App.css';
-import cookie from 'react-cookies';
+import axios from 'axios';
 import LogoPng from './createGroup.svg';
 import './createGroup.scss';
 import Member from './Member';
@@ -40,6 +40,10 @@ class Creategroup extends Component{
          this.handleChange = this.handleChange.bind(this)
     }
     componentDidMount() {
+
+     if(!localStorage.getItem('token')){
+          this.props.history.push('/')
+     }
         let { detailId } = this.state
          if(detailId) {
 
@@ -60,9 +64,6 @@ class Creategroup extends Component{
                         groupPicUrl : group.picture
                    })
               })
-         }
-         if(!cookie.load('cookie')){
-          this.props.history.push('/')
          }
     }
     handleChange(e) {
@@ -103,19 +104,42 @@ class Creategroup extends Component{
     }
     saveToGroup() {
         let { groupPicUrl,groupName,members,detailId } = this.state
+     //    let data = {
+     //        user_id : this.props.userInfo._id,
+     //        user_name : this.props.userInfo.Name,
+     //        name : groupName,
+     //        picture : groupPicUrl,
+     //        members : members.filter(item => item.id && !item.isDetail).map(item => item.id)
+     //    }
+        let m = members.filter(item => item.id && !item.isDetail).map(item => item.id)
+       
+        alert(m)
         let data = {
-            user_id : this.props.userInfo._id,
-            user_name : this.props.userInfo.Name,
-            name : groupName,
-            picture : groupPicUrl,
-            members : members.filter(item => item.id && !item.isDetail).map(item => item.id)
+          query: `
+          mutation{
+               createGroup(groupInput:{ 
+               user_id: "${this.props.userInfo._id}"
+               user_name: "${this.props.userInfo.Name}"
+               name: "${groupName}"
+               picture: "${groupPicUrl}"
+               members: [${m}]
+               }) 
+               {
+               message
+               }
+          }
+          
+          `
         }
         if(detailId) {
              data.group_id = detailId
         }
+        axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+        alert("1")
         createGroup(data).then(res => {
              alert('Save succeed')
         })
+        alert("2")
     }
     render(){
         let { members,groupPicUrl,groupName } = this.state

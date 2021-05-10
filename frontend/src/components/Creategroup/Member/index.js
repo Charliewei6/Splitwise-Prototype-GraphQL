@@ -15,14 +15,28 @@ class Member extends Component {
           this.inpChange = this.inpChange.bind(this)
      }
      inpChange(stateName,e) {
-     //    this.props.onAttrChange(stateName,e.target.value,this.props.memberIndex);
-        console.log(e.target.value)
-        searchUser(e.target.value).then(data => {
-          //     if(data && data.length) {
+        let search_data = {
+          query: `
+          query{
+               searchPerson(email:"${e.target.value}"){
+                 users {
+                   _id
+                   Name
+                   Email
+                   Phone
+                   Currency
+                   Language
+                   Timezone
+                   Picture
+                 }
+               }
+          }
+          `
+        }
+        searchUser(search_data).then(data => {
                    this.setState({
-                         findUsers: data.filter(item => item._id !== this.props.userInfo._id )
+                         findUsers: data.data.searchPerson.users.filter(item => item._id !== this.props.userInfo._id )
                    })
-          //     }
         })
      }
      deleteCurrentMember() {
