@@ -1,7 +1,6 @@
 import React, {Component} from 'react';
 import '../../App.css';
 import axios from 'axios';
-import cookie from 'react-cookies';
 import Navbar from '../Navbar/Navbar';
 import {Container} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -32,17 +31,55 @@ class Recent extends Component{
         if(!localStorage.getItem('token')){
             this.props.history.push('/')
         }
-        // if(!cookie.load('cookie')){
-        //     this.props.history.push('/')
-        //    }
+        
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        getRecent(this.props.userInfo,this.state.searchName,this.state.timeSort).then(data => {
+        
+        var order = this.state.timeSort ? 1 : 0;
+        let data = {
+            query: `
+            query{
+                getActivity(user_id:"${this.props.userInfo._id}",group_id:"",order:${order}){
+                    activity {
+                    status
+                    _id
+                    expense_id {
+                        _id
+                        creator_id
+                        creator_name
+                        group_id
+                        group_name
+                        money
+                        name
+                        create_at
+                    }
+                    group_id
+                    owe_id {
+                        _id
+                        Name
+                        Email
+                        Phone
+                        Currency
+                        Language
+                        Timezone
+                        Picture
+                    }
+                    owed_id
+                    money
+                    
+                    }
+                }
+            }
+                  
+
+            `
+        }
+        getRecent(data).then(data => {
             this.setState({
-               totalPost : data.length
+               totalPost : data.data.getActivity.activity.length
            })
             var indexOfLastPost = this.state.currentPage * this.state.postsPerPage;
             var indexOfFirstPost = indexOfLastPost - this.state.postsPerPage;
-            const currentData = data.slice(indexOfFirstPost, this.state.postsPerPage);
+            const currentData = data.data.getActivity.activity.slice(indexOfFirstPost, this.state.postsPerPage);
             this.setState({
                  recentList : currentData
             })
@@ -55,16 +92,91 @@ class Recent extends Component{
         this.setState({
             timeSort
         })
-        getRecent(this.props.userInfo,this.state.searchName,timeSort).then(data => {
+        var order = timeSort ? 1 : 0;
+        let data = {
+            query: `
+            query{
+                getActivity(user_id:"${this.props.userInfo._id}",group_id:"",order:${order}){
+                    activity {
+                    status
+                    _id
+                    expense_id {
+                        _id
+                        creator_id
+                        creator_name
+                        group_id
+                        group_name
+                        money
+                        name
+                        create_at
+                    }
+                    group_id
+                    owe_id {
+                        _id
+                        Name
+                        Email
+                        Phone
+                        Currency
+                        Language
+                        Timezone
+                        Picture
+                    }
+                    owed_id
+                    money
+                    
+                    }
+                }
+            }
+            `
+        }
+        getRecent(data).then(data => {
             this.setState({
-                 recentList : data
+                 recentList : data.data.getActivity.activity
             })
        })
     }
+
     changeGroup(groupId) {
-        getRecent(this.props.userInfo,groupId,this.state.timeSort).then(data => {
+        var order = this.state.timeSort ? 1 : 0;
+        let data = {
+            query: `
+            query{
+                getActivity(user_id:"${this.props.userInfo._id}",group_id:"${groupId}",order:${order}){
+                    activity {
+                    status
+                    _id
+                    expense_id {
+                        _id
+                        creator_id
+                        creator_name
+                        group_id
+                        group_name
+                        money
+                        name
+                        create_at
+                    }
+                    group_id
+                    owe_id {
+                        _id
+                        Name
+                        Email
+                        Phone
+                        Currency
+                        Language
+                        Timezone
+                        Picture
+                    }
+                    owed_id
+                    money
+                    
+                    }
+                }
+            }
+            `
+        }
+        getRecent(data).then(data => {
             this.setState({
-                    recentList : data
+                recentList : data.data.getActivity.activity
             })
         }) 
     }
@@ -74,10 +186,48 @@ class Recent extends Component{
             postsPerPage : e.target.value,
             currentPage : 1
         })
-        getRecent(this.props.userInfo,this.state.searchName,this.state.timeSort).then(data => {
+
+        var order = this.state.timeSort ? 1 : 0;
+        let data = {
+            query: `
+            query{
+                getActivity(user_id:"${this.props.userInfo._id}",group_id:"",order:${order}){
+                    activity {
+                    status
+                    _id
+                    expense_id {
+                        _id
+                        creator_id
+                        creator_name
+                        group_id
+                        group_name
+                        money
+                        name
+                        create_at
+                    }
+                    group_id
+                    owe_id {
+                        _id
+                        Name
+                        Email
+                        Phone
+                        Currency
+                        Language
+                        Timezone
+                        Picture
+                    }
+                    owed_id
+                    money
+                    
+                    }
+                }
+            }
+            `
+        }
+        getRecent(data).then(data => {
             var indexOfLastPost = this.state.currentPage * this.state.postsPerPage;
             var indexOfFirstPost = indexOfLastPost - this.state.postsPerPage;
-            const currentData = data.slice(indexOfFirstPost, indexOfLastPost);
+            const currentData = data.data.getActivity.activity.slice(indexOfFirstPost, indexOfLastPost);
             this.setState({
                  recentList : currentData
             })
@@ -87,10 +237,47 @@ class Recent extends Component{
         this.setState({
             currentPage : number
         })
-        getRecent(this.props.userInfo,this.state.searchName,this.state.timeSort).then(data => {
+        var order = this.statetimeSort ? 1 : 0;
+        let data = {
+            query: `
+            query{
+                getActivity(user_id:"${this.props.userInfo._id}",group_id:"",order:${order}){
+                    activity {
+                    status
+                    _id
+                    expense_id {
+                        _id
+                        creator_id
+                        creator_name
+                        group_id
+                        group_name
+                        money
+                        name
+                        create_at
+                    }
+                    group_id
+                    owe_id {
+                        _id
+                        Name
+                        Email
+                        Phone
+                        Currency
+                        Language
+                        Timezone
+                        Picture
+                    }
+                    owed_id
+                    money
+                    
+                    }
+                }
+            }
+            `
+        }
+        getRecent(data).then(data => {
             var indexOfLastPost = this.state.currentPage * this.state.postsPerPage;
             var indexOfFirstPost = indexOfLastPost - this.state.postsPerPage;
-            const currentData = data.slice(indexOfFirstPost, indexOfLastPost);
+            const currentData = data.data.getActivity.activity.slice(indexOfFirstPost, indexOfLastPost);
             this.setState({
                  recentList : currentData
             })

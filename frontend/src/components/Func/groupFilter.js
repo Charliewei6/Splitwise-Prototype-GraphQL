@@ -10,11 +10,30 @@ class GroupFilter extends Component {
         }
      }
      componentDidMount() {
-        getGroupList(this.props.userInfo,'').then(res=> {
+        let data={
+            query: `
+            query{
+                getGroups(user_id:"${this.props.userInfo._id}",group_name:""){
+                  groupList{
+                    _id
+                    group_id{
+                      _id
+                      creator_id
+                      picture
+                      name
+                    }
+                    person_id
+                    balance
+                  }
+                }
+              }
+            `
+        }
+        getGroupList(data).then(result=> {
             this.setState({
-                groupList : res
+                groupList : result.data.getGroups.groupList
             })
-        })
+        }) 
      }
     changeGroup(e) {
         this.setState({

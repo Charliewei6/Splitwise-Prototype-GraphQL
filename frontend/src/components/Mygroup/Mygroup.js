@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import '../../App.css';
-import cookie from 'react-cookies';
 import axios from 'axios';
 import {Container,Col,Row,Form} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -18,31 +17,81 @@ class Mygroup extends Component{
     }
     searchGroup(e) {
         let val = e.target.value
-        getGroupList(this.props.userInfo,val).then(res=> {
+        let data={
+            query: `
+            query{
+                getGroups(user_id:"${this.props.userInfo._id}",group_name:"${val}"){
+                  groupList{
+                    _id
+                    group_id{
+                      _id
+                      creator_id
+                      picture
+                      name
+                    }
+                    person_id
+                    balance
+                  }
+                }
+              }
+            `
+        }
+        getGroupList(data).then(result=> {
             this.setState({
-                groupList : res
+                groupList : result.data.getGroups.groupList
             })
-        })
+        }) 
     }
     componentDidMount() {
         if(!localStorage.getItem('token')){
             this.props.history.push('/')
         }
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        getInvite(this.props.userInfo).then(res=> {
+        let data = {
+            query: `
+            query{
+                getInvite(user_id:"${this.props.userInfo._id}"){
+                  inviteList {
+                    _id
+                    inviter_id
+                    inviter_name
+                    group_id
+                    group_name
+                    invitee_id
+                  } 
+                }
+              }
+            `
+        }
+        getInvite(data).then(res=> {
              this.setState({
-                 inviteList : res
+                 inviteList : res.data.getInvite.inviteList
              })
-             
         })
-        getGroupList(this.props.userInfo).then(res=> {
+        let data2={
+            query: `
+            query{
+                getGroups(user_id:"${this.props.userInfo._id}",group_name:""){
+                  groupList{
+                    _id
+                    group_id{
+                      _id
+                      creator_id
+                      picture
+                      name
+                    }
+                    person_id
+                    balance
+                  }
+                }
+              }
+            `
+        }
+        getGroupList(data2).then(result=> {
             this.setState({
-                groupList : res
+                groupList : result.data.getGroups.groupList
             })
-        })
-        // if(!cookie.load('cookie')){
-        //     this.props.history.push('/')
-        //    }
+        }) 
     }
     logoutGroup(item,e) {
          e.stopPropagation()
@@ -50,28 +99,101 @@ class Mygroup extends Component{
             user_id : this.props.userInfo._id,
             group_id : item.group_id._id
          }
-         quitGroup(data).then(res => {
-              if(res.code === 0) {
+         let data1 = {
+            query: `
+            mutation{
+                quitGroup(user_id:"${this.props.userInfo._id}",
+                group_id:"${item.group_id._id}"){
+                  code
+                }
+              }
+            `
+         }
+         quitGroup(data1).then(res => {
+              if(res.data.quitGroup.code === 0) {
                    alert('You can only leave this group after cleared all dues')
               }else {
-                getGroupList(this.props.userInfo).then(res=> {
+                let data2={
+                    query: `
+                    query{
+                        getGroups(user_id:"${this.props.userInfo._id}",group_name:""){
+                          groupList{
+                            _id
+                            group_id{
+                              _id
+                              creator_id
+                              picture
+                              name
+                            }
+                            person_id
+                            balance
+                          }
+                        }
+                      }
+                    `
+                }
+                getGroupList(data2).then(result=> {
                     this.setState({
-                        groupList : res
+                        groupList : result.data.getGroups.groupList
                     })
                 }) 
               }
          })
     }
     handlerAgree(item) {
-        agreeRequest(item._id).then(data => {
-            
-              getInvite(this.props.userInfo).then(res=> {
+
+        let data_1 = {
+            query: `
+            mutation{
+                postInvite(invite_id:"${item._id}"){
+                  message
+                }
+              }
+            `
+        }
+        agreeRequest(data_1).then(data => {
+            let data_2 = {
+                query: `
+                query{
+                    getInvite(user_id:"${this.props.userInfo._id}"){
+                      inviteList {
+                        _id
+                        inviter_id
+                        inviter_name
+                        group_id
+                        group_name
+                        invitee_id
+                      } 
+                    }
+                  }
+                `
+            }
+            getInvite(data_2).then(res=> {
                 this.setState({
-                    inviteList : res
+                    inviteList : res.data.getInvite.inviteList
                 })
-                getGroupList(this.props.userInfo).then(res=> {
+                let data_3={
+                    query: `
+                    query{
+                        getGroups(user_id:"${this.props.userInfo._id}",group_name:""){
+                          groupList{
+                            _id
+                            group_id{
+                              _id
+                              creator_id
+                              picture
+                              name
+                            }
+                            person_id
+                            balance
+                          }
+                        }
+                      }
+                    `
+                }
+                getGroupList(data_3).then(result=> {
                     this.setState({
-                        groupList : res
+                        groupList : result.data.getGroups.groupList
                     })
                 }) 
            })

@@ -1,6 +1,5 @@
 import React, {Component} from 'react';
 import '../../App.css';
-import cookie from 'react-cookies';
 import Navbar from '../Navbar/Navbar';
 import AddExpense from '../Func/AddExpense';
 import {Container,Col,Row} from 'react-bootstrap';
@@ -30,46 +29,199 @@ class Group extends Component{
             this.props.history.push('/')
         }
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        getGroupList(this.props.userInfo).then(res => {
+        let data1={
+            query: `
+            query{
+                getGroups(user_id:"${this.props.userInfo._id}",group_name:""){
+                  groupList{
+                    _id
+                    group_id{
+                      _id
+                      creator_id
+                      picture
+                      name
+                    }
+                    person_id
+                    balance
+                  }
+                }
+              }
+            `
+        }
+        getGroupList(data1).then(res => {
             // alert(res[0].group_id._id)
              this.setState({
-                  groupList : res,
-                  currentGroup : res[0] || {}
+                  groupList : res.data.getGroups.groupList,
+                  currentGroup : res.data.getGroups.groupList[0] || {}
              })
              if(this.state.currentGroup._id) {
-                getGroupContent(this.state.currentGroup.group_id._id).then(data => {
+                let data2 = {
+                    query: `
+                    query{
+                        groupPage(group_id:"${this.state.currentGroup.group_id._id}"){
+                          expense{
+                            _id
+                          creator_id
+                          creator_name
+                          group_id
+                          group_name
+                          money
+                          name
+                          create_at
+                          comment_list {
+                            notes
+                            creator_id {
+                              _id
+                              Name
+                              Email
+                              Phone
+                              Currency
+                              Language
+                              Timezone
+                              Picture
+                            }
+                          }
+                          }
+                          member{
+                            balance
+                              _id
+                            group_id
+                            person_id {
+                              _id
+                              Name
+                              Email
+                              Phone
+                              Currency
+                              Language
+                              Timezone
+                              Picture
+                            }
+                          }
+                        }
+                      }
+                    `
+                }
+                getGroupContent(data2).then(data => {
                     this.setState({
-                        expenses : data.expenses,
-                        members : data.members
+                        expenses : data.data.groupPage.expense,
+                        members : data.data.groupPage.member
                     })
                 })   
              }
              
         })
-        // if(!cookie.load('cookie')){
-        //     this.props.history.push('/')
-        //    }
-        
     }
     changeGroup(item) {
         this.setState({
              currentGroup : item
         })
-        getGroupContent(item.group_id._id).then(data => {
+        let data = {
+            query: `
+            query{
+                groupPage(group_id:"${item.group_id._id}"){
+                  expense{
+                    _id
+                  creator_id
+                  creator_name
+                  group_id
+                  group_name
+                  money
+                  name
+                  create_at
+                  comment_list {
+                    notes
+                    creator_id {
+                      _id
+                      Name
+                      Email
+                      Phone
+                      Currency
+                      Language
+                      Timezone
+                      Picture
+                    }
+                  }
+                  }
+                  member{
+                    balance
+                      _id
+                    group_id
+                    person_id {
+                      _id
+                      Name
+                      Email
+                      Phone
+                      Currency
+                      Language
+                      Timezone
+                      Picture
+                    }
+                  }
+                }
+              }
+            `
+        }
+        getGroupContent(data).then(data => {
             this.setState({
-                expenses : data.expenses,
-                members : data.members
+                expenses : data.data.groupPage.expense,
+                members : data.data.groupPage.member
             })
         })   
     }
     addExpenseResolve() {
         // update view after add expense.
-        getGroupContent(this.state.currentGroup.group_id._id).then(data => {
+        let data = {
+            query: `
+            query{
+                groupPage(group_id:"${this.state.currentGroup.group_id._id}"){
+                  expense{
+                    _id
+                  creator_id
+                  creator_name
+                  group_id
+                  group_name
+                  money
+                  name
+                  create_at
+                  comment_list {
+                    notes
+                    creator_id {
+                      _id
+                      Name
+                      Email
+                      Phone
+                      Currency
+                      Language
+                      Timezone
+                      Picture
+                    }
+                  }
+                  }
+                  member{
+                    balance
+                      _id
+                    group_id
+                    person_id {
+                      _id
+                      Name
+                      Email
+                      Phone
+                      Currency
+                      Language
+                      Timezone
+                      Picture
+                    }
+                  }
+                }
+              }
+            `
+        }
+        getGroupContent(data).then(data => {
             this.setState({
-                expenses : data.expenses,
-                members : data.members
+                expenses : data.data.groupPage.expense,
+                members : data.data.groupPage.member
             })
-        })
+        }) 
     }
     commentHandler = (expid,e) => {
         e.preventDefault();
@@ -84,17 +236,68 @@ class Group extends Component{
         if (window.confirm('Are you sure you wish to delete this comment?'))
         {
             let data = {
-                noteId:id
+                query: `
+                mutation{
+                    delComment(noteId:"${id}"){
+                      message
+                    }
+                  }
+                `
             }
-            
             deleteComment(data).then(res => {
                 alert('delete comment successed')
-                getGroupContent(this.state.currentGroup.group_id._id).then(data => {
+                let data2 = {
+                    query: `
+                    query{
+                        groupPage(group_id:"${this.state.currentGroup.group_id._id}"){
+                          expense{
+                            _id
+                          creator_id
+                          creator_name
+                          group_id
+                          group_name
+                          money
+                          name
+                          create_at
+                          comment_list {
+                            notes
+                            creator_id {
+                              _id
+                              Name
+                              Email
+                              Phone
+                              Currency
+                              Language
+                              Timezone
+                              Picture
+                            }
+                          }
+                          }
+                          member{
+                            balance
+                              _id
+                            group_id
+                            person_id {
+                              _id
+                              Name
+                              Email
+                              Phone
+                              Currency
+                              Language
+                              Timezone
+                              Picture
+                            }
+                          }
+                        }
+                      }
+                    `
+                }
+                getGroupContent(data2).then(data => {
                     this.setState({
-                        expenses : data.expenses,
-                        members : data.members
+                        expenses : data.data.groupPage.expense,
+                        members : data.data.groupPage.member
                     })
-                })
+                }) 
             }).catch(err => {
                  alert(err)
             })
@@ -105,18 +308,69 @@ class Group extends Component{
         e.preventDefault();
         let {_id} = this.props.userInfo
         let data = {
-             user_id : _id,
-             expense_id: this.state.expenseid,
-             note: this.state.comment
+            query: `
+            mutation{
+                addComment(commentInput:{expense_id:"${this.state.expenseid}",
+                  user_id:"${_id}",note:"${this.state.comment}"}){
+                  message
+                }
+              }
+            `
         }
         addComment(data).then(res => {
             alert('add comment successed')
-            getGroupContent(this.state.currentGroup.group_id._id).then(data => {
+            let data2 = {
+                query: `
+                query{
+                    groupPage(group_id:"${this.state.currentGroup.group_id._id}"){
+                      expense{
+                        _id
+                      creator_id
+                      creator_name
+                      group_id
+                      group_name
+                      money
+                      name
+                      create_at
+                      comment_list {
+                        notes
+                        creator_id {
+                          _id
+                          Name
+                          Email
+                          Phone
+                          Currency
+                          Language
+                          Timezone
+                          Picture
+                        }
+                      }
+                      }
+                      member{
+                        balance
+                          _id
+                        group_id
+                        person_id {
+                          _id
+                          Name
+                          Email
+                          Phone
+                          Currency
+                          Language
+                          Timezone
+                          Picture
+                        }
+                      }
+                    }
+                  }
+                `
+            }
+            getGroupContent(data2).then(data => {
                 this.setState({
-                    expenses : data.expenses,
-                    members : data.members
+                    expenses : data.data.groupPage.expense,
+                    members : data.data.groupPage.member
                 })
-            })
+            }) 
         }).catch(err => {
              alert(err)
         })
@@ -159,11 +413,10 @@ class Group extends Component{
                           <h3 className='mt20'>EXPENSE</h3>
                           {
                                expenses.length ? expenses.map(item => {
-
                                return <div>
                                     <div key={item._id} className='flex' style={{ justifyContent:'space-between',alignItems:'center',paddingBottom:'10px',borderBottom:'1px solid #dddddd' }}>
                                         <div style={{ textAlign:'left'}}>
-                                            <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha z')}</div>
+                                            {/* <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha z')}</div> */}
                                             <div>Group name:<span className='color-primary'>{item.group_name}</span></div> 
                                             <div>Creator : <span className='color-primary'>{item.creator_name}</span></div> 
                                         </div>
@@ -184,7 +437,7 @@ class Group extends Component{
                                             <Card.Body>
                                               <h4>Notes and Comments</h4>  
                                             {
-                                                item.comment_list.map(ite => {     
+                                                item.comment_list.map(ite => {    
                                                     return ite.creator_id._id===_id ? 
                                                             <div className='flex' style={{ justifyContent:'space-between',alignItems:'flex-start',paddingBottom:'10px'}}>
                                                                You: {ite.notes}           

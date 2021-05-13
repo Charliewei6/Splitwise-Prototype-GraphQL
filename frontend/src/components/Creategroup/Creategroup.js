@@ -112,8 +112,6 @@ class Creategroup extends Component{
      //        members : members.filter(item => item.id && !item.isDetail).map(item => item.id)
      //    }
         let m = members.filter(item => item.id && !item.isDetail).map(item => item.id)
-       
-        alert(m)
         let data = {
           query: `
           mutation{
@@ -122,7 +120,7 @@ class Creategroup extends Component{
                user_name: "${this.props.userInfo.Name}"
                name: "${groupName}"
                picture: "${groupPicUrl}"
-               members: [${m}]
+               members: ["${m[0]}","${m[1]}","${m[2]}","${m[3]}","${m[4]}","${m[5]}","${m[6]}"]
                }) 
                {
                message
@@ -135,11 +133,10 @@ class Creategroup extends Component{
              data.group_id = detailId
         }
         axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
-        alert("1")
         createGroup(data).then(res => {
-             alert('Save succeed')
+               alert('Save succeed')
+             this.props.history.push('/group')
         })
-        alert("2")
     }
     render(){
         let { members,groupPicUrl,groupName } = this.state

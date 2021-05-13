@@ -40,15 +40,19 @@ class Group extends Component{
               return;
          }
          let data = {
-              user_id : _id,
-              user_name : Name,
-              group_id : groupChosed.group_id._id,
-              group_name : groupChosed.group_id.name,
-              name : expenseName,
-              money : Number(money)
+            query: ` 
+            mutation{
+                addExpense(expenseInput:
+                  {user_id:"${_id}",user_name:"${Name}",group_id:"${groupChosed.group_id._id}",
+                    group_name:"${groupChosed.group_id.name}",name:"${expenseName}",money:${Number(money)}}) {
+                  code
+                }
+              }
+            
+            `
          }
          addExpense(data).then(res => {
-             if(res.code === 0) {
+             if(res.data.addExpense.code === 0) {
                  alert('You cannot add an expense without other group members')
              }else {
                 alert('add successed')
@@ -56,7 +60,7 @@ class Group extends Component{
                 this.props.updateCallback && this.props.updateCallback()
              }
          }).catch(err => {
-              alert(err.code)
+              alert("error")
          })
     }
     handleExPenseName(e) {
@@ -72,19 +76,57 @@ class Group extends Component{
          console.log(item)
     }
     componentDidMount() {
-        getGroupList(this.props.userInfo).then(res=> {
+        let data={
+            query: `
+            query{
+                getGroups(user_id:"${this.props.userInfo._id}",group_name:""){
+                  groupList{
+                    _id
+                    group_id{
+                      _id
+                      creator_id
+                      picture
+                      name
+                    }
+                    person_id
+                    balance
+                  }
+                }
+              }
+            `
+        }
+        getGroupList(data).then(result=> {
             this.setState({
-                groupList : res
+                groupList : result.data.getGroups.groupList
             })
-        })
+        }) 
     }
     searchHandler(e) {
         let val = e.target.value
-        getGroupList(this.props.userInfo,val).then(res=> {
+        let data={
+            query: `
+            query{
+                getGroups(user_id:"${this.props.userInfo._id}",group_name:"${val}"){
+                  groupList{
+                    _id
+                    group_id{
+                      _id
+                      creator_id
+                      picture
+                      name
+                    }
+                    person_id
+                    balance
+                  }
+                }
+              }
+            `
+        }
+        getGroupList(data).then(result=> {
             this.setState({
-                groupList : res
+                groupList : result.data.getGroups.groupList
             })
-        })
+        }) 
     }
     render(){
         let { showModal,groupList,groupChosed } = this.state

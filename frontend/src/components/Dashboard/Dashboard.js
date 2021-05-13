@@ -14,18 +14,158 @@ class Dashboard extends Component{
         this.props.history.push('/')
     }
       axios.defaults.headers.common['authorization'] = localStorage.getItem('token');
+      let data = {
+        query: `
+        query{
+          getDashboard(user_id:"${this.props.userInfo._id}"){
+            owe {
+              status
+              _id
+              expense_id {
+                _id
+                creator_id
+                creator_name
+                group_id
+                group_name
+                money
+                name
+                create_at
+              }
+              group_id
+              owe_id
+              owed_id {
+                _id
+                Name
+                Email
+                Phone
+                Currency
+                Language
+                Timezone
+                Picture
+              }
+              money
+        
+            }
+            owed {
+              status
+              _id
+              expense_id {
+                _id
+                creator_id
+                creator_name
+                group_id
+                group_name
+                money
+                name
+                create_at
+              }
+              group_id
+              owe_id {
+                _id
+                Name
+                Email
+                Phone
+                Currency
+                Language
+                Timezone
+                Picture
+              }
+              owed_id
+              money
+            }
+            total_owe
+            total_owed
+            total_balance
+          }
+        }
 
-      getDashboard(this.props.userInfo._id).then(data => {
-          this.props.setDashBoard(data)
+        `
+      }
+      getDashboard(data).then(data => {
+          this.props.setDashBoard(data.data.getDashboard)
       })
-      // if(!cookie.load('cookie')){
-      //   this.props.history.push('/')
-      //  }
     }
+
     settleUpHandler() {
-      settleUp(this.props.userInfo._id).then(res => {
-          getDashboard(this.props.userInfo._id).then(data => {
-            this.props.setDashBoard(data)
+      let data1 = {
+        query: `
+        mutation{
+          settleUp(user_id:"${this.props.userInfo._id}"){
+            message
+          }
+        }
+        `
+      }
+      settleUp(data1).then(res => {
+        let data = {
+          query: `
+          query{
+            getDashboard(user_id:"${this.props.userInfo._id}"){
+              owe {
+                status
+                _id
+                expense_id {
+                  _id
+                  creator_id
+                  creator_name
+                  group_id
+                  group_name
+                  money
+                  name
+                  create_at
+                }
+                group_id
+                owe_id
+                owed_id {
+                  _id
+                  Name
+                  Email
+                  Phone
+                  Currency
+                  Language
+                  Timezone
+                  Picture
+                }
+                money
+          
+              }
+              owed {
+                status
+                _id
+                expense_id {
+                  _id
+                  creator_id
+                  creator_name
+                  group_id
+                  group_name
+                  money
+                  name
+                  create_at
+                }
+                group_id
+                owe_id {
+                  _id
+                  Name
+                  Email
+                  Phone
+                  Currency
+                  Language
+                  Timezone
+                  Picture
+                }
+                owed_id
+                money
+              }
+              total_owe
+              total_owed
+              total_balance
+            }
+          }
+  
+          `
+        }
+        getDashboard(data).then(data => {
+            this.props.setDashBoard(data.data.getDashboard)
         })
       })
     }
