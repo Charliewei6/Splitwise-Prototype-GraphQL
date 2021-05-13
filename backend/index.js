@@ -8,7 +8,6 @@ var cors = require('cors');
 app.set('view engine', 'ejs');
 var path = require('path');
 var multer = require("multer");
-var moment = require("moment");
 var fs = require('fs');
 var AWS = require('aws-sdk');
 

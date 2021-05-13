@@ -276,7 +276,6 @@ module.exports = {
           if(order==0)
               result = result.reverse()
           return{activity:result}
-          
       }
   },
   settleUp :async ({user_id}) => {

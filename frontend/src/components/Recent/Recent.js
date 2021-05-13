@@ -86,7 +86,6 @@ class Recent extends Component{
        })
        
     }
-   
     sortHandler() {  
         let timeSort = !this.state.timeSort
         this.setState({

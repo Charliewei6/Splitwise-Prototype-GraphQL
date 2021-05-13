@@ -60,7 +60,6 @@ const uploadImg = (file) => {
         }
     }).then(res => res.data)
 }
-
 const getGroupDetail = (groupId) => {
     return axios.get(`${domain}/group?group_id=${groupId}`).then(res => res.data)
 }
