@@ -53,7 +53,6 @@ const settleUp = (data) => {
     return axios.post(`${domain}/graphql`,data).then(res => res.data)
 }
 
-
 const uploadImg = (file) => {
     return axios.post(`${domain}/upload`,file,{
         onUploadProgress : e => {

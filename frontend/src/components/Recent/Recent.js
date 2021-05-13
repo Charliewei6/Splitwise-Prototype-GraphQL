@@ -129,11 +129,17 @@ class Recent extends Component{
             }
             `
         }
-        getRecent(data).then(data => {
-            this.setState({
-                 recentList : data.data.getActivity.activity
-            })
+       getRecent(data).then(data => {
+        this.setState({
+           totalPost : data.data.getActivity.activity.length
        })
+        var indexOfLastPost = this.state.currentPage * this.state.postsPerPage;
+        var indexOfFirstPost = indexOfLastPost - this.state.postsPerPage;
+        const currentData = data.data.getActivity.activity.slice(indexOfFirstPost, this.state.postsPerPage);
+        this.setState({
+             recentList : currentData
+        })
+   })
     }
 
     changeGroup(groupId) {

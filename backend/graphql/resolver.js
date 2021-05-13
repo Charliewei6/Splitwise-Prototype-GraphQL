@@ -204,7 +204,6 @@ module.exports = {
     
     var res2 = await GroupPerson.find({ group_id:groupId }).
     populate({path: 'person_id'} )
-
     console.log("expense:",res1);
     console.log("member:",res2);
     return{

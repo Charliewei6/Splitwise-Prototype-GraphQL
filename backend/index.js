@@ -22,13 +22,9 @@ const graphQlResolvers = require('./graphql/resolver');
 
 const { mongoDB } = require('./config');
 const mongoose = require('mongoose');
-const Users = require('./Models/UserModel')
-const CreateGroup = require('./Models/CreateGroupModel')
+
 const GroupPerson = require('./Models/GroupPersonModel')
-const Invite = require('./Models/InviteModel')
-const Expense = require('./Models/ExpenseModel')
 const ExpenseItem = require('./Models/ExpenseItemModel')
-const Comment = require('./Models/CommentModel')
 var options = {
     useNewUrlParser: true,
     useUnifiedTopology: true,
@@ -128,7 +124,6 @@ app.get('/upload', function (req, res) {
     res.sendFile( __dirname + "/" + req.url );
 });
  
-
 
 
 app.post('/settle_up',async function(req,res){
