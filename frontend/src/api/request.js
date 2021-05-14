@@ -64,7 +64,6 @@ const getGroupDetail = (groupId) => {
     return axios.get(`${domain}/group?group_id=${groupId}`).then(res => res.data)
 }
 
-
 export {
      login,
      signUP,

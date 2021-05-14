@@ -301,7 +301,6 @@ module.exports = {
     } 
     await ExpenseItem.updateMany({owed_id:userId,status:0},{$set: {status:1}})
     return{message:"settle up success"}
-
   }
   
   

@@ -144,6 +144,7 @@ type Owed{
 type Activity{
     activity: [Owed]
 }
+
 type RootQuery {
     getprofile(user_id: String!): Profile!
     searchPerson(email: String!): Person

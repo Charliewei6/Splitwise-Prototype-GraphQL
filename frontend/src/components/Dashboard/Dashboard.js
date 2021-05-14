@@ -169,6 +169,7 @@ class Dashboard extends Component{
         })
       })
     }
+    
     render(){
         let { dashData,userInfo } = this.props
         return(

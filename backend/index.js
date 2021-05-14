@@ -10,7 +10,6 @@ var path = require('path');
 var multer = require("multer");
 var fs = require('fs');
 var AWS = require('aws-sdk');
-
 const { checkAuth } = require("./passport");
 const { auth } = require("./passport");
 auth();
