@@ -4,7 +4,7 @@ import axios from 'axios';
 import Navbar from '../Navbar/Navbar';
 import {Container} from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { getRecent,getGroupList } from '../../api/request'
+import { getRecent} from '../../api/request'
 import { connect } from 'react-redux'
 import GroupFilter from '../Func/groupFilter'
 import  moment  from 'moment-timezone'
@@ -317,16 +317,18 @@ class Recent extends Component{
                               return  <div key={index} className='recent-item' style={{ flexDirection:'column',alignItems:'flex-start',
                               cursor:'default',borderBottom:'1px solid #ddd',paddingBottom:'10px' }}>
                                 <div>{
-                                    item.owed_id===_id ? <div>
-                                            <div>You added "<span className='color-primary'>{item.expense_id.name}</span>" in group  "<span className='color-primary'>{item.expense_id.group_name}</span>".</div>
-                                            <div style={{color:'#5bc5a7'}}> {item.owe_id.Name} owes you {currencyStr}{ Math.round(item.money * 100) / 100 }</div>
-                                            <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha z')}</div>
-                                        </div>:
-                                        <div>
-                                            <div>{item.expense_id.creator_name} added "<span className='color-primary'>{item.expense_id.name}</span>" in group  "<span className='color-primary'>{item.expense_id.group_name}</span>".</div>
-                                            <div style={{color:'#ff652f'}}>You owe {currencyStr}{ Math.round(item.money * 100) / 100 }</div>
-                                            <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha z')}</div>
-                                        </div>
+                                    item.owed_id===_id ? 
+                                    
+                                    <div>
+                                        <div>You added "<span className='color-primary'>{item.expense_id.name}</span>" in group  "<span className='color-primary'>{item.expense_id.group_name}</span>".</div>
+                                        <div style={{color:'#5bc5a7'}}> {item.owe_id.Name} owes you {currencyStr}{ Math.round(item.money * 100) / 100 }</div>
+                                        <div title={moment(item.expense_id.create_at).format('YYYY-MM-DD')}>{moment(item.expense_id.create_at).tz(Timezone).format('YYYY-MM-DD ha')}</div>
+                                    </div>:
+                                    <div>
+                                        <div>{item.expense_id.creator_name} added "<span className='color-primary'>{item.expense_id.name}</span>" in group  "<span className='color-primary'>{item.expense_id.group_name}</span>".</div>
+                                        <div style={{color:'#ff652f'}}>You owe {currencyStr}{ Math.round(item.money * 100) / 100 }</div>
+                                        <div title={moment(item.expense_id.create_at).format('YYYY-MM-DD')}>{moment(item.expense_id.create_at).tz(Timezone).format('YYYY-MM-DD ha')}</div>
+                                    </div>
                                    
                                 }
                                 </div>

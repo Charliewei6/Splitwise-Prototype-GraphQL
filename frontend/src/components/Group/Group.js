@@ -416,7 +416,7 @@ class Group extends Component{
                                return <div>
                                     <div key={item._id} className='flex' style={{ justifyContent:'space-between',alignItems:'center',paddingBottom:'10px',borderBottom:'1px solid #dddddd' }}>
                                         <div style={{ textAlign:'left'}}>
-                                            {/* <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha z')}</div> */}
+                                            <div title={moment(item.create_at).format('YYYY-MM-DD')}>{moment(item.create_at).tz(Timezone).format('YYYY-MM-DD ha')}</div>
                                             <div>Group name:<span className='color-primary'>{item.group_name}</span></div> 
                                             <div>Creator : <span className='color-primary'>{item.creator_name}</span></div> 
                                         </div>

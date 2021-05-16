@@ -1,6 +1,8 @@
 const { buildSchema } = require('graphql');
-
+const {GraphQLDateTime} = require('graphql-iso-date')
 module.exports = buildSchema(`
+scalar GraphQLDateTime
+
 type User {
   email: String!
 }
@@ -98,7 +100,7 @@ type Expense{
     group_name: String
     money: Float
     name: String
-    create_at: String
+    create_at: GraphQLDateTime
     comment_list: [Comment]
 }
 type Comment{
