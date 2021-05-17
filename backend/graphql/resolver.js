@@ -26,7 +26,7 @@ module.exports = {
       });
       const result = await user.save();
       console.log(result)
-      return { email: result.Email };
+      return { message: "signup success"};
     } catch (err) {
       throw err;
     }

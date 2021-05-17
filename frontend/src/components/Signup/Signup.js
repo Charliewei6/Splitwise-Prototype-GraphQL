@@ -43,16 +43,11 @@ class Signup extends Component{
     //submit Login handler to send a request to the node backend
     submitSignup = (e) => {
         e.preventDefault();
-        // const data = {
-        //     email : this.state.email,
-        //     name : this.state.name,
-        //     password : this.state.password
-        // }
         const data = {
             query: `
               mutation {
                 signup( userInput:{name: "${this.state.name}",email: "${this.state.email}", password: "${this.state.password}"}) {
-                   email
+                   message
                 }
               }
             `
@@ -65,10 +60,15 @@ class Signup extends Component{
         }else {
             signUP(data)
                 .then(response => {
-                      this.loginHandler()
-                }).catch((error) => this.setState({
-                    err: "Email Already Existed!"
-                }))    
+                    if(response.errors){
+                        this.setState({
+                            err: "Email Already Existed!"
+                        })
+                    }
+                    else{
+                        this.loginHandler()
+                    }        
+                })  
         }
         
     }

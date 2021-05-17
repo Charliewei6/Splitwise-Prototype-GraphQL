@@ -158,7 +158,7 @@ type RootQuery {
 }
 type RootMutation {
     login(email: String!, password: String!): AuthData!
-    signup(userInput: UserInput): User
+    signup(userInput: UserInput): Message
     postProfile(profileInput: ProfileInput): Profile
     createGroup(groupInput: GroupInput): Message
     postInvite(invite_id: String!): Message
